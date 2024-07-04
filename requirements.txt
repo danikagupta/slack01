@@ -3,6 +3,7 @@ slack_bolt
 slack_sdk
 openai
 
+google-auth
 
 assemblyai
 

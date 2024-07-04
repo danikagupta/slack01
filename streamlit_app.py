@@ -4,6 +4,7 @@ from slack_sdk.errors import SlackApiError
 from datetime import datetime
 import pandas as pd
 import json
+from google.oauth2 import service_account
 
 
 # Initialize Slack client with your bot token
@@ -67,6 +68,14 @@ def handle_selection(title, url):
     st.write(f"Selected Title: {title}")
     st.write(f"YouTube URL: {url}")
 
+def get_google_cloud_credentials():
+    # Get Google Cloud credentials from JSON file
+    js1 = st.secrets["GOOGLE_KEY"]
+    print(" A-plus Google credentials JS: ", js1)
+    credentials_dict=json.loads(js1)
+    credentials = service_account.Credentials.from_service_account_info(credentials_dict)   
+    return credentials
+
 def authenticate():
     st.title("Authentication Required")
     password = st.text_input("Enter the access key:", type="password")
@@ -79,6 +88,7 @@ def authenticate():
 def main_page():
     # Streamlit app layout
     st.sidebar.title('Slack Message Fetcher')
+    credentials = get_google_cloud_credentials()
 
     # Fetch and display available channels
     if 'channels' not in st.session_state:
