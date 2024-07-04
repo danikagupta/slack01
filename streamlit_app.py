@@ -53,6 +53,7 @@ def get_df_from_messages(messages):
     return pd.DataFrame(data)
 
 def handle_selection(title, url):
+    print(f"Selected Title: {title}, URL: {url}")
     st.write(f"Selected Title: {title}")
     st.write(f"YouTube URL: {url}")
 
@@ -76,48 +77,41 @@ st.markdown(css, unsafe_allow_html=True)
 st.sidebar.title('Slack Message Fetcher')
 
 # Fetch and display available channels
-channels = fetch_channels()
+if 'channels' not in st.session_state:
+    st.session_state.channels = fetch_channels()
+channels = st.session_state.channels
 channel_options = {channel['name']: channel['id'] for channel in channels}
+channel_name = 'session-notifications'
+channel_id = channel_options[channel_name]
 
-if channel_options:
-    #channel_name = st.selectbox('Select a Slack channel:', list(channel_options.keys()))
-    channel_name = 'session-notifications'
-    start_date = st.sidebar.date_input('Start date', datetime.now())
-    start_time = st.sidebar.time_input('Start time', datetime.now().time())
-    end_date = st.sidebar.date_input('End date', datetime.now())
-    end_time = st.sidebar.time_input('End time', datetime.now().time())
 
-    start_datetime = datetime.combine(start_date, start_time)
-    end_datetime = datetime.combine(end_date, end_time)
+start_date = st.sidebar.date_input('Start date', datetime.now())
+start_time = st.sidebar.time_input('Start time', datetime.now().time())
+end_date = st.sidebar.date_input('End date', datetime.now())
+end_time = st.sidebar.time_input('End time', datetime.now().time())
 
-    if st.sidebar.button('<Fetch Messages>'):
-        channel_id = channel_options[channel_name]
-        messages = fetch_messages(channel_id, start_datetime, end_datetime)
-        #pm = json.dumps(messages[:5],indent=2)
-        #print(f"*****\n******\n*****\nMessages: {pm}")
-        df=get_df_from_messages(messages)
+start_datetime = datetime.combine(start_date, start_time)
+end_datetime = datetime.combine(end_date, end_time)
 
-        col1, col2, col3, col4 = st.columns([2, 3, 3, 2])
-        col1.markdown('<p class="stColumn"><strong>Meeting</strong></p>', unsafe_allow_html=True)
-        col2.markdown('<p class="stColumn"><strong>Date Time </strong></p>', unsafe_allow_html=True)
-        col3.markdown('<p class="stColumn"><strong>Action</strong></p>', unsafe_allow_html=True)
-        col4.markdown('<p class="stColumn"><strong>Action</strong></p>', unsafe_allow_html=True)
+if st.sidebar.button('<Fetch Messages>'):
+    channel_id = channel_options[channel_name]
+    messages = fetch_messages(channel_id, start_datetime, end_datetime)
+    st.session_state.df=get_df_from_messages(messages)
+
+if 'df' in st.session_state:
+    event=st.dataframe(
+        st.session_state.df,
+        on_select='rerun',
+        hide_index=True,
+        selection_mode='multi-row'
+    )
+
+    print(f"Event: {event}")
+    if len(event.selection['rows'])>0:
+        print(f"Selected Rows: {event.selection['rows']}")
+        row_index=event.selection['rows'][0]
+        title=st.session_state.df.iloc[row_index]['Title']
+        url=st.session_state.df.iloc[row_index]['YouTube URL']
+        handle_selection(title, url)
 
         
-        for index,row in df.iterrows():
-            col1, col2, col3, col4 = st.columns([2, 3, 3, 2])
-            with col1:
-                st.markdown(f'<p class="stColumn">{row["Title"]}</p>', unsafe_allow_html=True)
-            with col2:
-                st.markdown(f'<p class="stColumn">{row["Datetime"]}</p>', unsafe_allow_html=True)
-            with col3:
-                st.markdown(f'<p class="stColumn">{row["YouTube URL"]}</p>', unsafe_allow_html=True)
-            with col4:
-                st.markdown('<div class="stColumn">', unsafe_allow_html=True)
-                st.button(row['Title'], key=f"direct_button_{index}",on_click=handle_selection, args=[row['Title'], row['YouTube URL']])
-                st.markdown('</div>', unsafe_allow_html=True)
-            #col1.write(row['Title'])
-            #col2.write(row['Datetime'])
-            #col3.write(row['YouTube URL'])
-            #col4.button(row['Title'], key=f"direct_button_{index}",on_click=handle_selection, args=[row['Title'], row['YouTube URL']])
-
