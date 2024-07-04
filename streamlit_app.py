@@ -5,6 +5,9 @@ from datetime import datetime
 import pandas as pd
 import json
 from google.oauth2 import service_account
+import hashlib
+
+from google_firestore import check_and_add_zoom_session
 
 
 # Initialize Slack client with your bot token
@@ -76,6 +79,24 @@ def get_google_cloud_credentials():
     credentials = service_account.Credentials.from_service_account_info(credentials_dict)   
     return credentials
 
+def process_slack_messages(credentials,messages):
+    print(f"Start processing messages: {len(messages)}")
+    print(messages[0])
+    for m in messages:
+        if m['subtype'] != 'bot_message':
+            continue
+        #print(f"Message is: {m}")
+        #print(f"Attachments is: {m['attachments']}")
+        #print(f"Attachment 0 is: {m['attachments'][0]}")
+        #print(f"Action is: {m['attachments'][0]['actions']}")
+        title = m["text"].replace("bot:", "")
+        timestamp = datetime.fromtimestamp(float(m["ts"]))
+        youtube_url = m["attachments"][0]["actions"][0]["url"]
+        hash_hex = hashlib.md5(f"{title}-{timestamp}-{youtube_url}".encode()).hexdigest()
+        print(f"Hash: {hash_hex} Title: {title} Timestamp: {timestamp} URL: {youtube_url} ")
+        check_and_add_zoom_session(credentials,hash_hex, title, timestamp, youtube_url)
+
+
 def authenticate():
     st.title("Authentication Required")
     password = st.text_input("Enter the access key:", type="password")
@@ -110,6 +131,7 @@ def main_page():
     if st.sidebar.button('<Fetch Messages>'):
         channel_id = channel_options[channel_name]
         messages = fetch_messages(channel_id, start_datetime, end_datetime)
+        process_slack_messages(credentials, messages)
         st.session_state.df=get_df_from_messages(messages)
 
     if 'df' in st.session_state:

@@ -4,6 +4,7 @@ slack_sdk
 openai
 
 google-auth
+google-cloud-firestore
 
 assemblyai
 
