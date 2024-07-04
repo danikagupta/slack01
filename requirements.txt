@@ -1,1 +1,14 @@
 streamlit
+slack_bolt
+slack_sdk
+openai
+
+
+assemblyai
+
+langchain
+langchain_community
+langchain-core
+langgraph
+
+langchain_openai
