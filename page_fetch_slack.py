@@ -102,7 +102,7 @@ def authenticate():
     password = st.text_input("Enter the access key:", type="password")
     if password == st.secrets["ACCESS_KEY"]:
         st.session_state["authenticated"] = True
-        st.rerun()
+        st.experimental_rerun()
     elif password:
         st.error("Invalid secret key")
 
@@ -155,14 +155,7 @@ def main_page():
             url=st.session_state.df.iloc[row_index]['YouTube URL']
             handle_selection(title, url)
 
-if __name__ == '__main__':
-    if "authenticated" not in st.session_state:
-        st.session_state["authenticated"] = False
-    if st.session_state["authenticated"]:
-        #main_page()
-        page1=st.Page('page_fetch_slack.py',title="Fetch Slack")
-        page2=st.Page('page_show_sessions.py',title="Show Sessions")
-        pg=st.navigation([page1,page2])
-        pg.run()
-    else:
-        authenticate()     
+#
+# Main method for page
+#
+main_page()
