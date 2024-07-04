@@ -52,6 +52,16 @@ def get_df_from_messages(messages):
             })
     return pd.DataFrame(data)
 
+def make_clickable(title, url):
+    #return f'<a href="{url}" target="_blank">{title}</a>'
+    return f"[{title}] {url} "
+
+def create_markdown_link(row):
+    title=row['Title']
+    link=row['YouTube URL']
+    #return f"[{row['Title']}]({row['YouTube URL']})"
+    return f'<a target="_blank" href="{link}">{title}</a>'
+
 def handle_selection(title, url):
     print(f"Selected Title: {title}, URL: {url}")
     st.write(f"Selected Title: {title}")
@@ -93,11 +103,16 @@ def main_page():
         st.session_state.df=get_df_from_messages(messages)
 
     if 'df' in st.session_state:
+        df=st.session_state.df.copy()
+        #df['Title'] = df.apply(lambda row: make_clickable(row['Title'], row['YouTube URL']), axis=1)
+        #df_display = df[['Title', 'Datetime']]
+
+        
         event=st.dataframe(
-            st.session_state.df,
+            df,
             on_select='rerun',
             hide_index=True,
-            selection_mode='multi-row'
+            selection_mode='single-row'
         )
 
         print(f"Event: {event}")
