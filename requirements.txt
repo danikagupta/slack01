@@ -6,7 +6,13 @@ openai
 google-auth
 google-cloud-firestore
 
+#
+# sudo apt update
+# sudo apt install ffmpeg
+#
+
 assemblyai
+yt_dlp
 
 langchain
 langchain_community

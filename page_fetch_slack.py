@@ -8,6 +8,7 @@ from google.oauth2 import service_account
 import hashlib
 
 from google_firestore import check_and_add_zoom_session
+from generate_transcript import transcribe_session
 
 
 # Initialize Slack client with your bot token
@@ -70,6 +71,8 @@ def handle_selection(title, url):
     #print(f"Selected Title: {title}, URL: {url}")
     st.write(f"Selected Title: {title}")
     st.write(f"YouTube URL: {url}")
+    transcript=transcribe_session(url,st.secrets['ASSEMBLYAI_API_KEY'])
+    st.write(transcript)
 
 def get_google_cloud_credentials():
     # Get Google Cloud credentials from JSON file

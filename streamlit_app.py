@@ -77,6 +77,7 @@ def get_google_cloud_credentials():
     #print(" A-plus Google credentials JS: ", js1)
     credentials_dict=json.loads(js1)
     credentials = service_account.Credentials.from_service_account_info(credentials_dict)   
+    st.session_state.credentials = credentials
     return credentials
 
 def process_slack_messages(credentials,messages):
@@ -160,9 +161,12 @@ if __name__ == '__main__':
         st.session_state["authenticated"] = False
     if st.session_state["authenticated"]:
         #main_page()
+        get_google_cloud_credentials()
+
+        page0=st.Page('streamlit_app.py',title="Home Page")
         page1=st.Page('page_fetch_slack.py',title="Fetch Slack")
         page2=st.Page('page_show_sessions.py',title="Show Sessions")
-        pg=st.navigation([page1,page2])
+        pg=st.navigation([page0,page1,page2])
         pg.run()
     else:
         authenticate()     
