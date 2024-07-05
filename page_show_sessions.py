@@ -25,11 +25,14 @@ def main():
     
     # Convert records to DataFrame
     df = pd.DataFrame(records)
+    df['Transcript available']=df['transcript'].notnull()
     
     # Display DataFrame in Streamlit
     st.dataframe(df,
                 column_config={
-                'id':None
+                'id':None,
+                'transcript':None,
+                'status':None,
                 },
                  hide_index=True, 
                  use_container_width=True)
