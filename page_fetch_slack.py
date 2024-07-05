@@ -7,7 +7,7 @@ import json
 from google.oauth2 import service_account
 import hashlib
 
-from google_firestore import check_and_add_zoom_session
+from google_firestore import check_and_add_zoom_session, fetch_document_id, update_field_by_id
 from generate_transcript import transcribe_session
 
 
@@ -71,7 +71,12 @@ def handle_selection(title, url):
     #print(f"Selected Title: {title}, URL: {url}")
     st.write(f"Selected Title: {title}")
     st.write(f"YouTube URL: {url}")
+    json_obj=fetch_document_id(st.session_state.credentials, url)
+    #transcript=f"Document: {json_obj}"
+    #st.write(f"Document: {json_obj}")
+    doc_id=json_obj[0]['id']
     transcript=transcribe_session(url,st.secrets['ASSEMBLYAI_API_KEY'])
+    update_field_by_id(st.session_state.credentials, doc_id, 'transcript', transcript)
     st.write(transcript)
 
 def get_google_cloud_credentials():

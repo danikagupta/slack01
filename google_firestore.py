@@ -9,6 +9,28 @@ def find_zoom_session(session_id):
     else:
         return None
     
+def fetch_document_id(credentials, url):
+    db = firestore.Client(credentials=credentials)
+    collection_ref = db.collection(u'sessions')
+    query = collection_ref.where('youtube_url', '==', url)
+    docs = query.stream()
+    
+    # Collect document IDs that match the query
+    results = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+    return results
+
+def update_field_by_id(credentials, document_id, field_name, new_value):
+    db = firestore.Client(credentials=credentials)
+    collection_ref = db.collection(u'sessions')
+    
+    # Reference to the specific document within the collection
+    document_ref = collection_ref.document(document_id)
+    
+    # Update the field in the document
+    document_ref.update({field_name: new_value})
+    print(f"Document {document_id} updated: {field_name} = {new_value}")
+
+    
 def check_and_add_zoom_session(credentials,hash_id,title,timestamp,youtube_url):
     db = firestore.Client(credentials=credentials)
     doc_ref = db.collection(u'sessions').document(hash_id)
