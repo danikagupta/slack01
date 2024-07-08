@@ -8,6 +8,16 @@ def find_zoom_session(session_id):
         return doc.to_dict()
     else:
         return None
+
+def fetch_sessions_with_transcripts(credentials):
+    db = firestore.Client(credentials=credentials)
+    collection_ref = db.collection(u'sessions')
+    query = collection_ref.where('status', '==', 'transcripted')
+    docs = query.stream()
+    
+    # Collect document IDs that match the query
+    results = [{'id': doc.id, **doc.to_dict()} for doc in docs]
+    return results
     
 def fetch_document_id(credentials, url):
     db = firestore.Client(credentials=credentials)
@@ -19,7 +29,7 @@ def fetch_document_id(credentials, url):
     results = [{'id': doc.id, **doc.to_dict()} for doc in docs]
     return results
 
-def update_field_by_id(credentials, document_id, field_name, new_value):
+def update_session_field_by_id(credentials, document_id, field_name, new_value, new_status):
     db = firestore.Client(credentials=credentials)
     collection_ref = db.collection(u'sessions')
     
@@ -27,7 +37,7 @@ def update_field_by_id(credentials, document_id, field_name, new_value):
     document_ref = collection_ref.document(document_id)
     
     # Update the field in the document
-    document_ref.update({field_name: new_value})
+    document_ref.update({field_name: new_value, 'status': new_status})
     print(f"Document {document_id} updated: {field_name} = {new_value}")
 
     
